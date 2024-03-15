@@ -1,3 +1,6 @@
+//Aniya Ross
+//Date: 3/14/2024
+
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,7 +12,7 @@ void *Alloc(size_t sz)
 {
 	extraMemoryAllocated += sz;
 	size_t* ret = malloc(sizeof(size_t) + sz);
-	*ret = sz;
+ 	*ret = sz;
 	printf("Extra memory allocated, size: %ld\n", sz);
 	return &ret[1];
 }
@@ -30,7 +33,69 @@ size_t Size(void* ptr)
 // implement merge sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
-{
+{   
+    //declare variables
+    int middle, i, j, k;
+
+    if(l < r){
+        //find middle point to divide the array into two halves
+        middle = (l+r)/2;
+        //call mergeSort for first half of array using recursion
+        mergeSort(pData, l, middle);
+        //call mergesort for second half of array using recursion
+        mergeSort(pData, middle + 1, r);
+        
+		//merge subarrays
+        //create temporary arrays
+        int size1 = middle-l+1;
+        int size2 = r - middle;
+        int *left = (int*)Alloc(size1 * sizeof(int));
+        int *right = (int*) Alloc(size2 * sizeof(int));
+
+        //copy data to tempory arrays
+        for(i = 0; i < size1; i++)
+            left[i] = pData[l + i];
+        for(j = 0; j < size2; j++)
+            right[j] = pData[middle + 1 + j];
+        
+        //merge temporary arrays
+        i = 0; 
+        j = 0;
+        k = l;
+
+        while(i < size1 && j < size2)
+		{
+            if(left[i] <= right[j])
+			{
+                pData[k] = left[i];
+                i++;
+            } 
+            else
+			{
+                pData[k] = right[j];
+                j++;
+            }
+            k++;
+        }
+
+        //copy remaining elements of the left half / right half if there are any
+        while(i < size1){
+            //handling left side
+            pData[k] = left[i];
+            i++;
+            k++;
+        }
+        while(j < size2){
+            //handling right side
+            pData[k] = right[j];
+            j++;
+            k++;
+        }
+        
+        //clean memory
+        DeAlloc(left);
+        DeAlloc(right);
+    }
 }
 
 // parses input file to an integer array
@@ -67,19 +132,25 @@ int parseData(char *inputFileName, int **ppData)
 // prints first and last 100 items in the data array
 void printArray(int pData[], int dataSz)
 {
-	int i, sz = dataSz - 100;
-	printf("\tData:\n\t");
-	for (i=0;i<100;++i)
-	{
-		printf("%d ",pData[i]);
+	int i, sz = (dataSz > 100 ? dataSz - 100: 0);
+	int firstHundred = (dataSz < 100 ? dataSz : 100);
+	if(dataSz < 100){
+		printf("\tData:\n\t");
+		for(i = 0; i < firstHundred; ++i){
+			printf("%d ", pData[i]);
+		}
 	}
-	printf("\n\t");
-	
-	for (i=sz;i<dataSz;++i)
-	{
-		printf("%d ",pData[i]);
+	else{
+		printf("\tData:\n\t");
+		for(i = 0; i<firstHundred; ++i){
+			printf("%d", pData[i]);
+		}
+		printf("\n\t");
+		for(i = sz; i < dataSz; ++i){
+			printf("%d ", pData[i]);
+		}
+		printf("\n\n");
 	}
-	printf("\n\n");
 }
 
 int main(void)
